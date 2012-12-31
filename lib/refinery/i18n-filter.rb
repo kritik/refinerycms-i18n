@@ -9,8 +9,8 @@ module RoutingFilter
             ''
           end
           path.sub!(%r{^$}) { '/' }
-        elsif (loc = extract_locale_from_subdomain(env)).present?
-          ::I18n.locale = loc
+        elsif (locale = extract_locale_from_subdomain(env)).present?
+          ::I18n.locale = locale
         else
           ::I18n.locale = ::Refinery::I18n.default_frontend_locale
         end
@@ -35,7 +35,8 @@ module RoutingFilter
         if ::Refinery::I18n.url_filter_enabled? and
            locale != ::Refinery::I18n.default_frontend_locale and
            result !~ %r{^/(#{Refinery::Core.backend_route}|wymiframe)}
-          result.sub!(%r(^(http.?://[^/]*)?(.*))) { "#{$1}/#{locale}#{$2}" }
+          url_locale = (::Refinery::I18n.locale_from_domain? ? '' : "/#{locale}")
+          result.sub!(%r(^(http.?://[^/]*)?(.*))) { "#{$1}#{url_locale}#{$2}" }
         end
       end
     end
